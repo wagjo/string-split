@@ -1,0 +1,10 @@
+.lein-deps-sum
+.lein-plugins
+.lein-repl-history
+*jar
+/pom.xml
+/lib
+/target
+/out
+/gh-pages
+/checkouts
