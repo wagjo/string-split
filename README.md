@@ -79,8 +79,8 @@ TODO
 (time (count (into [] (foldit (siof/split \space text)))))
 (with-progress-reporting
   (bench (into [] (foldit (siof/split \space text))) :verbose))
-;; Reducer time: 72.141531 ms
-;; Folder time: 33.634083 ms
+;; Reducer time: 85.141531 ms
+;; Folder time: 29.634083 ms
 ```
 
 ## Machine

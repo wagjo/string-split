@@ -3,7 +3,6 @@
   :url "https://github.com/wagjo/string-split"
   :dependencies [[org.clojure/data.generators "0.1.2"]
                  [org.clojure/clojure "1.5.1"]
-                 [core.async "0.1.0-SNAPSHOT"]
                  [criterium "0.4.2"]]
   :source-paths ["src/clj"]
   :java-source-paths ["src/jvm"]
