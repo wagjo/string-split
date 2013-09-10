@@ -1,34 +1,57 @@
 ;; Copyright (C) 2013, Jozef Wagner. All rights reserved.
+;;
+;; The use and distribution terms for this software are covered by the
+;; Eclipse Public License 1.0
+;; (http://opensource.org/licenses/eclipse-1.0.php) which can be
+;; found in the file epl-v10.html at the root of this distribution.
+;;
+;; By using this software in any fashion, you are agreeing to be bound
+;; by the terms of this license.
+;;
+;; You must not remove this notice, or any other, from this software.
 
-(ns wagjo.split.core
+(ns wagjo.split.benchmark
   "Describe ways to split a string in Clojure.
    Prepared forms for benchmarking."
-  (:require [clojure.string :as str]
+  (:require [clojure.core.reducers :as r]
+            [clojure.string :as str]
             [criterium.core :refer :all]
-            [wagjo.split.generator :refer [corpus]]
-            [wagjo.split.indexof :as siof]
-            [clojure.core.reducers :as r]))
+            [wagjo.util.generator :refer [corpus]]
+            [wagjo.split.algo.indexof :as siof]
+            [wagjo.split.algo.lazy :as slazy]))
 
 ;;;; Implementation details
 
+(defn ^:private available-processors
+  "Returns number of available processors on this machine."
+  []
+  (.availableProcessors (Runtime/getRuntime)))
+
 (defn ^:private guess-chunk-size
   "Given a string s, returns an estimated chunk size for fold
-   operation on that string.
-   Author: https://github.com/pmbauer/"
+   operation on that string."
   [s]
-  (max (/ (count s)
-          (* 2 (.availableProcessors (Runtime/getRuntime))))
-       4096))
+  (-> (count s)
+      (/ 2)
+      (/ (available-processors))
+      (max 4096)))
 
 (defonce ^{:private true
            :doc "text which is being splitted"}
   text
   "")
 
+(def ^{:private true
+       :doc "text seq which is being splitted"}
+  text-seq
+  (doall (seq text)))
+
 (defmacro ^:private parallel
   "Helper macro to run the folding."
-  [expr]
-  `(r/fold (guess-chunk-size text) r/cat r/append! ~expr))
+  ([expr]
+     `(parallel ~expr (guess-chunk-size text)))
+  ([expr chunk-size]
+     `(r/fold ~chunk-size r/cat r/append! ~expr)))
 
 (defmacro ^:private timed
   "Helper macro to run the simple time with count."
@@ -40,6 +63,14 @@
   [& expr]
   `(with-progress-reporting (bench (do ~@expr) :verbose)))
 
+(defn ^:private whitespace?
+  "Returns true if given character is considered a whitespace."
+  [^Character c]
+  (or (.equals c (char 32))
+      (.equals c (char 9))
+      (.equals c (char 10))
+      (.equals c (char 13))))
+
 ;;;; Testing
 
 (comment
@@ -48,6 +79,8 @@
   (time (def text (corpus 10)))
   (time (def text (corpus 1000)))
   (time (def text (corpus 1000000)))
+
+  (def text-seq (doall (seq text)))
 
   ;; == Various ways to split a string
   ;; * everything implemented as both reducible
@@ -68,8 +101,14 @@
   ;; * small memory usage
 
   ;; ==== lazy-seqs
-  ;; * very slow, should not be used ever
-  ;; TODO
+  ;; * very slow, should not be used, ever
+  ;; * no parallel variant
+  ;; * can keep whitespace chunks in the result
+
+  (timed (into [] (slazy/split whitespace? text-seq)))
+  (timed (into [] (slazy/split whitespace? true text-seq)))
+  (benchmarked (into [] (slazy/split whitespace? text-seq)))
+  (benchmarked (into [] (slazy/split whitespace? true text-seq)))
 
   ;; ==== naive iterative reducer/folder
   ;; * slow but straightforward
@@ -106,11 +145,8 @@
   ;; ** delimiter is one character, or string (not implemented yet)
   ;; ** does not keep delimiters (whitespace chunks) in the result
   
-  ;; simple timing
   (timed (into [] (siof/split \space text)))
   (timed (into [] (parallel (siof/split \space text))))
-
-  ;; throughout benchmarking
   (benchmarked (into [] (siof/split \space text)))
   (benchmarked (into [] (parallel (siof/split \space text))))
   

@@ -1,4 +1,28 @@
-# Various ways to split a string in Clojure
+# Various ways to split a string in a Clojure
+
+This project demonstrates various ways to split a string in a Clojure. When choosing a particular variant, you have to keep following in mind:
+
+* check the requirements on the inputs
+  * some variants work with collection of characters and support 
+    on the fly processing and infinite collections, some work only 
+    on strings already loaded in the memory.
+  * do determine when to split a string, some variants take ordinary
+    function, some just allows to specify char or set of chars on
+    which to split
+  * some variants cannot return 'whitespace chunks', which may
+    be required in some cases.
+
+Similarly, when comparing which variant is better, consider following 
+aspects:
+
+  * how much time it takes to produce a result. This is easily 
+    measured with clojure.core/time or criterium benchmarking library
+  * how much memory will be allocated for the result. This can be 
+    analyzed through any JVM profiler.
+  * how many garbage (temporary objects) is created while computing
+    result. This is a creepy performance hit, which can be analyzed
+    with commercial JVM profilers, e.g. JProfiler.
+
 
 * everything implemented as both reducible
   and foldable collection
@@ -20,7 +44,14 @@
 
 ### lazy-seqs
 
-* very slow, should not be used ever
+* see [wagjo.split.algo.lazy](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/lazy.clj)
+* very slow, should not be used, ever
+* very high memory use, large amount of garbage
+* easy technique, easy to reason about
+* no parallel variant
+* can keep whitespace chunks in the result
+* `Reducer time: 3200 ms (4200 ms if keeping whitespace chunks)`
+* `Folder time: N/A`
 
 TODO
 
@@ -66,22 +97,13 @@ TODO
   
 ### indexOf reducer/folder
 
+* see [wagjo.split.algo.lazy](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/indexof.clj)
 * THE fastest reducer/folder, but has specific limitations
   * delimiter is one character, or string (not implemented yet)
   * does not keep delimiters (whitespace chunks) in the result
-
-```clojure  
-;; benchmark reducer
-(time (count (into [] (siof/split \space text))))
-(with-progress-reporting
-  (bench (into [] (siof/split \space text)) :verbose))
-;; benchmark folder
-(time (count (into [] (foldit (siof/split \space text)))))
-(with-progress-reporting
-  (bench (into [] (foldit (siof/split \space text))) :verbose))
-;; Reducer time: 85.141531 ms
-;; Folder time: 29.634083 ms
-```
+* lowest memory use and almost no garbage (a tiny bit when folding)
+* `Reducer time: 80 ms`
+* `Folder time: 30 ms`
 
 ## Machine
 
