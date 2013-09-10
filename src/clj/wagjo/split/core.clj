@@ -20,15 +20,25 @@
           (* 2 (.availableProcessors (Runtime/getRuntime))))
        4096))
 
-(def ^:private text
-  "text which is being splitted"
+(defonce ^{:private true
+           :doc "text which is being splitted"}
+  text
   "")
 
-(defmacro ^:private foldit
+(defmacro ^:private parallel
   "Helper macro to run the folding."
   [expr]
-  `(r/fold (guess-chunk-size text) r/cat r/append!
-           ~expr))
+  `(r/fold (guess-chunk-size text) r/cat r/append! ~expr))
+
+(defmacro ^:private timed
+  "Helper macro to run the simple time with count."
+  [& expr]
+  `(time (count ~@expr)))
+
+(defmacro ^:private benchmarked
+  "Helper macro to run the benchmarking."
+  [& expr]
+  `(with-progress-reporting (bench (do ~@expr) :verbose)))
 
 ;;;; Testing
 
@@ -96,14 +106,12 @@
   ;; ** delimiter is one character, or string (not implemented yet)
   ;; ** does not keep delimiters (whitespace chunks) in the result
   
-  ;; benchmark reducer
-  (time (count (into [] (siof/split \space text))))
-  (with-progress-reporting
-    (bench (into [] (siof/split \space text)) :verbose))
+  ;; simple timing
+  (timed (into [] (siof/split \space text)))
+  (timed (into [] (parallel (siof/split \space text))))
 
-  ;; benchmark folder
-  (time (count (into [] (foldit (siof/split \space text)))))
-  (with-progress-reporting
-    (bench (into [] (foldit (siof/split \space text))) :verbose))
+  ;; throughout benchmarking
+  (benchmarked (into [] (siof/split \space text)))
+  (benchmarked (into [] (parallel (siof/split \space text))))
   
 )
