@@ -1,28 +1,28 @@
-# Various ways to split a string in a Clojure
+# to split a string in a Clojure
 
-This project demonstrates various ways to split a string in a Clojure. When choosing a particular variant, you have to keep following in mind:
+This project demonstrates various ways to split a string in a Clojure. When choosing a particular variant, do not forget to check the requirements on the inputs:
 
-* check the requirements on the inputs
-  * some variants work with collection of characters and support 
-    on the fly processing and infinite collections, some work only 
-    on strings already loaded in the memory.
-  * do determine when to split a string, some variants take ordinary
-    function, some just allows to specify char or set of chars on
-    which to split
-  * some variants cannot return 'whitespace chunks', which may
-    be required in some cases.
+* some variants work with collection of characters and support 
+  on the fly processing and infinite collections, some work only 
+  on strings already loaded in the memory.
+* do determine when to split a string, some variants take ordinary
+  function, some just allows to specify char or set of chars on
+  which to split
+* some variants cannot return 'whitespace chunks', which may
+  be required in some cases.
 
 Similarly, when comparing which variant is better, consider following 
 aspects:
 
-  * how much time it takes to produce a result. This is easily 
-    measured with clojure.core/time or criterium benchmarking library
-  * how much memory will be allocated for the result. This can be 
-    analyzed through any JVM profiler.
-  * how many garbage (temporary objects) is created while computing
-    result. This is a creepy performance hit, which can be analyzed
-    with commercial JVM profilers, e.g. JProfiler.
+* how much time it takes to produce a result. This is easily 
+  measured with clojure.core/time or criterium benchmarking library
+* how much memory will be allocated for the result. This can be 
+  analyzed through any JVM profiler.
+* how many garbage (temporary objects) is created while computing
+  result. This is a creepy performance hit, which can be analyzed
+  with commercial JVM profilers, e.g. JProfiler.
 
+More notes:
 
 * everything implemented as both reducible
   and foldable collection
@@ -53,17 +53,32 @@ aspects:
 * `Reducer time: 3200 ms (4200 ms if keeping whitespace chunks)`
 * `Folder time: N/A`
 
-TODO
-
 ### naive iterative reducer/folder
 
+* see [wagjo.split.algo.partitionby-naive](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/partitionby_naive.clj)
 * slow but straightforward
-
-TODO
+* high memory use
+* lot of garbage when folding, because of result wrapping
+* parallel variant is actually slower, caused by wrapping 
+  intermediate values in a map and producing huge amount of garbage.
+* serves as a good base for understanding how things work 
+  before we get to the optimized variant
+* very flexible, can specify how to reduce/fold individual values 
+  to create partitions
+* `Reducer time: 1550 ms (2450 ms when keeping whitespace chunks)`
+* `Folder time: 3850 ms (5400 ms if keeping whitespace chunks)`
 
 ### mutable iterative reducer/folder
 
+* faster flexible variant
+
+TODO
+
+### mutable iterative reducer/folder on random accessible collections
+
 * fastest flexible variant
+* avoids chunk/segment minigame when folding
+* works only on collections which support random access
 
 TODO
 

@@ -18,7 +18,8 @@
             [criterium.core :refer :all]
             [wagjo.util.generator :refer [corpus]]
             [wagjo.split.algo.indexof :as siof]
-            [wagjo.split.algo.lazy :as slazy]))
+            [wagjo.split.algo.lazy :as slazy]
+            [wagjo.split.algo.partitionby-naive :as snaive]))
 
 ;;;; Implementation details
 
@@ -80,8 +81,6 @@
   (time (def text (corpus 1000)))
   (time (def text (corpus 1000000)))
 
-  (def text-seq (doall (seq text)))
-
   ;; == Various ways to split a string
   ;; * everything implemented as both reducible
   ;;   and foldable collection
@@ -112,7 +111,18 @@
 
   ;; ==== naive iterative reducer/folder
   ;; * slow but straightforward
-  ;; TODO
+
+  (timed (into [] (snaive/split whitespace? text-seq)))
+  (timed (into [] (snaive/split whitespace? true text-seq)))
+  (timed (into [] (parallel (snaive/split whitespace? text-seq))))
+  (timed (into []
+               (parallel (snaive/split whitespace? true text-seq))))
+  (benchmarked (into [] (snaive/split whitespace? text-seq)))
+  (benchmarked (into [] (snaive/split whitespace? true text-seq)))
+  (benchmarked
+   (into [] (parallel (snaive/split whitespace? text-seq))))
+  (benchmarked
+   (into [] (parallel (snaive/split whitespace? true text-seq))))
 
   ;; ==== mutable iterative reducer/folder
   ;; * fastest flexible variant

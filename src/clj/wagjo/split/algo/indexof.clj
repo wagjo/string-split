@@ -57,24 +57,21 @@
       (cond
        (zero? l) (combinef)
        (<= l n) (p/coll-reduce this reducef (combinef))
-       :else
-       (let [i (+ start (quot l 2))
-             ;; shift split point so that we
-             ;; don't have to merge strings
-             i (.indexOf string delim i)]
-         (if (== -1 i)
-           (p/coll-reduce
-            this reducef (combinef))
-           (let [v1 (split delim string start i)
-                 v2 (split delim string i end)
-                 fc (fn [child]
-                      #(r/coll-fold
-                        child n combinef reducef))]
-             (fjinvoke
-              #(let [f1 (fc v1)
-                     t2 (fjtask (fc v2))]
-                 (fjfork t2)
-                 (combinef (f1) (fjjoin t2)))))))))))
+       :else (let [i (+ start (quot l 2))
+                   ;; shift split point so that we
+                   ;; don't have to merge strings
+                   i (.indexOf string delim i)]
+               (if (== -1 i)
+                 (p/coll-reduce this reducef (combinef))
+                 (let [v1 (split delim string start i)
+                       v2 (split delim string (inc i) end)
+                       fc (fn [child]
+                            #(r/coll-fold child n combinef reducef))
+                       ff #(let [f1 (fc v1)
+                                 t2 (fjtask (fc v2))]
+                             (fjfork t2)
+                             (combinef (f1) (fjjoin t2)))]
+                   (fjinvoke ff))))))))
 
 ;;;; Public API
 
