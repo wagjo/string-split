@@ -66,13 +66,17 @@ More notes:
 * very flexible, can specify how to reduce/fold individual values 
   to create partitions
 * `Reducer time: 1550 ms (2450 ms when keeping whitespace chunks)`
-* `Folder time: 3850 ms (5400 ms if keeping whitespace chunks)`
+* `Folder time: 2500 ms (4000 ms if keeping whitespace chunks)`
 
 ### mutable iterative reducer/folder
 
 * faster flexible variant
-
-TODO
+* little garbage
+* very flexible, can specify how to reduce/fold individual values 
+  to create partitions
+* parallel variant really shines
+* `Reducer time: 575 ms (866 ms when keeping whitespace chunks)`
+* `Folder time: 213 ms (849 ms if keeping whitespace chunks)`
 
 ### mutable iterative reducer/folder on random accessible collections
 

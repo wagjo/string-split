@@ -73,7 +73,8 @@
                      ([a b c] (combinef a (combinef b c))))
           xcf (fn
                 ;; establish initial wrapped return value
-                ([] {:before nothing
+                ([]
+                   {:before nothing
                      :before-fval nothing
                      :ret (combinef)
                      :after nothing
@@ -81,10 +82,11 @@
                 ;; combine wrapped values
                 ;; this is a tough fn
                 ([l r]
-                   (let [{:keys [lbefore-fval lret
-                                 lafter lafter-fval]} l
-                         {:keys [rbefore rbefore-fval
-                                 rret rafter rafter-fval]} r
+                   (let [{lbefore-fval :before-fval lret :ret
+                          lafter :after lafter-fval :after-fval} l
+                         {rbefore :before rbefore-fval :before-fval
+                          rret :ret rafter :after
+                          rafter-fval :after-fval} r
                          ;; chunk is when no split was performed
                          lchunk? (nothing? lbefore-fval)
                          rchunk? (nothing? rbefore-fval)]
@@ -140,23 +142,24 @@
                                    :after-fval rafter-fval)))
                       ;; merge segments
                       :else
-                      (if (identical? lafter-fval rbefore-fval)
-                        ;; merge partials and process
-                        (assoc l :ret (combine
-                                       lret
-                                       (reduce-start
-                                        (icombinef lafter rbefore))
-                                       rret)
+                      (do
+                        (if (identical? lafter-fval rbefore-fval)
+                          ;; merge partials and process
+                          (assoc l :ret (combine
+                                         lret
+                                         (reduce-start
+                                          (icombinef lafter rbefore))
+                                         rret)
                                  :after rafter
                                  :after-fval rafter-fval)
-                        ;; do not merge parts
-                        (assoc l :ret (combine lret
-                                               (reduce-one
-                                                (reduce-start lafter)
-                                                rbefore)
-                                               rret)
+                          ;; do not merge parts
+                          (assoc l :ret (combine lret
+                                                 (reduce-one
+                                                  (reduce-start lafter)
+                                                  rbefore)
+                                                 rret)
                                  :after rafter
-                                 :after-fval rafter-fval))))))
+                                 :after-fval rafter-fval)))))))
           xrf (fn [wrapped-ret val]
                 (let [{:keys [before-fval ret after after-fval]}
                       wrapped-ret

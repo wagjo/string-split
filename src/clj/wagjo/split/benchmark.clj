@@ -19,6 +19,7 @@
             [wagjo.util.generator :refer [corpus]]
             [wagjo.split.algo.indexof :as siof]
             [wagjo.split.algo.lazy :as slazy]
+            [wagjo.split.algo.partitionby :as spart]
             [wagjo.split.algo.partitionby-naive :as snaive]))
 
 ;;;; Implementation details
@@ -46,6 +47,11 @@
        :doc "text seq which is being splitted"}
   text-seq
   (doall (seq text)))
+
+(def ^{:private true
+       :doc "text seq which is being splitted"}
+  text-vec
+  (vec text-seq))
 
 (defmacro ^:private parallel
   "Helper macro to run the folding."
@@ -114,21 +120,35 @@
 
   (timed (into [] (snaive/split whitespace? text-seq)))
   (timed (into [] (snaive/split whitespace? true text-seq)))
-  (timed (into [] (parallel (snaive/split whitespace? text-seq))))
+  (timed (into [] (parallel (snaive/split whitespace? text-vec))))
   (timed (into []
-               (parallel (snaive/split whitespace? true text-seq))))
+               (parallel (snaive/split whitespace? true text-vec))))
+
   (benchmarked (into [] (snaive/split whitespace? text-seq)))
   (benchmarked (into [] (snaive/split whitespace? true text-seq)))
+
+  (benchmarked (into [] (snaive/split whitespace? text-vec)))
+  (benchmarked (into [] (snaive/split whitespace? true text-vec)))
   (benchmarked
-   (into [] (parallel (snaive/split whitespace? text-seq))))
+   (into [] (parallel (snaive/split whitespace? text-vec))))
   (benchmarked
-   (into [] (parallel (snaive/split whitespace? true text-seq))))
+   (into [] (parallel (snaive/split whitespace? true text-vec))))
 
   ;; ==== mutable iterative reducer/folder
   ;; * fastest flexible variant
-  ;; TODO
 
-  
+  (timed (into [] (spart/split whitespace? text-seq)))
+  (timed (into [] (spart/split whitespace? true text-seq)))
+  (timed (into [] (parallel (spart/split whitespace? text-vec))))
+  (timed (into []
+               (parallel (spart/split whitespace? true text-vec))))
+  (benchmarked (into [] (spart/split whitespace? text-seq)))
+  (benchmarked (into [] (spart/split whitespace? true text-seq)))
+  (benchmarked
+   (into [] (parallel (spart/split whitespace? text-vec))))
+  (benchmarked
+   (into [] (parallel (spart/split whitespace? true text-vec))))
+
   ;; === split on string
   ;; * very fast because we have all data in memory
   ;; * larger memory usage
