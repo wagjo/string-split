@@ -66,17 +66,20 @@ More notes:
 * very flexible, can specify how to reduce/fold individual values 
   to create partitions
 * `Reducer time: 1550 ms (2450 ms when keeping whitespace chunks)`
-* `Folder time: 2500 ms (4000 ms if keeping whitespace chunks)`
+* `Folder time: 2500 ms (4000 ms when keeping whitespace chunks)`
 
 ### mutable iterative reducer/folder
 
+* see [wagjo.split.algo.partitionby](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/partitionby.clj)
 * faster flexible variant
+  * uses mutation for intermediate results to lower the garbage
 * little garbage
 * very flexible, can specify how to reduce/fold individual values 
   to create partitions
 * parallel variant really shines
 * `Reducer time: 575 ms (866 ms when keeping whitespace chunks)`
-* `Folder time: 213 ms (849 ms if keeping whitespace chunks)`
+* `Folder time: 213 ms (849 ms when keeping whitespace chunks)`
+  * slow performance when keeping whitespace chunks may be because benchmarking hits current JVM memory limit?
 
 ### mutable iterative reducer/folder on random accessible collections
 
