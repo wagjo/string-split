@@ -11,8 +11,7 @@
 ;; You must not remove this notice, or any other, from this software.
 
 (ns wagjo.split.algo.partitionby
-  "Generic reducible and foldable partition-by.
-   Naive variant without any optimizations."
+  "Generic reducible and foldable partition-by."
   (:refer-clojure :exclude [partition-by remove])
   (:require [clojure.core.reducers :as r]
             [wagjo.util.thread-last :as ->>]))
@@ -114,7 +113,7 @@
                 ;; establish initial wrapped return value
                 ([]
                    (UnsynchronizedPart. nothing nothing (combinef)
-                                         nothing nothing))
+                                        nothing nothing))
                 ;; combine wrapped values
                 ;; this is a tough fn
                 ([l r]
@@ -222,7 +221,7 @@
                                                rret))
                           (set-after! l rafter)
                           (set-after-fval! l rafter-fval)
-                          l)                        )))))
+                          l))))))
           xrf (fn [wrapped-ret val]
                 (let [after (get-after! wrapped-ret)
                       after-fval (get-after-fval! wrapped-ret)
@@ -286,7 +285,6 @@
            rf (fn [^StringBuilder l ^Character r] (.append l r))]
        (->> text-seq
             (partition-by whitespace-fn cf rf)
-            (r/map (fn [^CharSequence sb]
-                     #_(Thread/sleep 1) (.toString sb)))
+            (r/map (fn [^CharSequence sb] (.toString sb)))
             (->>/when-not keep-whitespace?
               (r/remove f))))))
