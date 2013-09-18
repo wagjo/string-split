@@ -19,6 +19,7 @@
             [wagjo.util.generator :refer [corpus]]
             [wagjo.split.algo.indexof :as siof]
             [wagjo.split.algo.lazy :as slazy]
+            [wagjo.split.algo.regex :as sregex]
             [wagjo.split.algo.partitionby :as spart]
             [wagjo.split.algo.partitionby-naive :as snaive]
             [wagjo.split.algo.partitionby-shift :as sshift]))
@@ -176,7 +177,17 @@
 
   ;; ==== regex reducer/folder
   ;; * any regex, may return empty strings
-  ;; TODO
+
+  (=
+    (into [] (sshift/split whitespace? text))
+    (into [] (sregex/split #"\S+" text))
+    (into [] (parallel (sregex/split #"\S+" text))))
+  
+  (timed (into [] (sregex/split #"\S+" text)))
+  (timed (into [] (parallel (sregex/split #"\S+" text))))
+  
+  (benchmarked (into [] (sregex/split #"\S+" text)))
+  (benchmarked (into [] (parallel (sregex/split #"\S+" text))))
 
   ;; ==== StringTokenizer reducer/folder
   ;; * set of delimiting chars

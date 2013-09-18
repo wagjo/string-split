@@ -103,9 +103,11 @@ More notes:
 
 ### regex reducer/folder
 
-* any regex, may return empty strings
-
-TODO
+* see [wagjo.split.algo.regex](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/regex.clj)
+* any regex, uses matcher so that we support early termination of reduce
+* fast, but keep in mind that you are using a cannon to shoot mosquitoes
+* `Reducer time: 296 ms`
+* `Folder time: 84 ms`
 
 ### StringTokenizer reducer/folder
 
@@ -128,6 +130,13 @@ TODO
 * lowest memory use and almost no garbage (a tiny bit when folding)
 * `Reducer time: 80 ms`
 * `Folder time: 30 ms`
+
+### indexOf reducer/folder with shared String
+
+* Java 7 no longes shares underlying string
+* this variant uses custom String-like class, which shares data with
+  original string
+* TODO
 
 ## Machine
 
