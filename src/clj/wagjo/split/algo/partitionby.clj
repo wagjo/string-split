@@ -262,7 +262,7 @@
    a new value. Returns a reducible and foldable collection of
    partitions. Each partition is created by reducing /folding 
    its elements with ireducef and icombinef.
-   This version is naive, without any optimizations."
+   This version is optimized, and takes any reducible collection."
   ([f ireducef coll]
      (PartitionBy. f ireducef ireducef coll))
   ([f icombinef ireducef coll]
@@ -273,9 +273,9 @@
    according to whitespace-fn. Returned collection does not contain
    empty strings. If keep-whitespace? is true (defaults to false),
    returned collection will contain 'whitespace chunks'."
-  ([whitespace-fn text-seq]
-     (split whitespace-fn false text-seq))
-  ([whitespace-fn keep-whitespace? text-seq]
+  ([whitespace-fn text-coll]
+     (split whitespace-fn false text-coll))
+  ([whitespace-fn keep-whitespace? text-coll]
      (let [f (fn [^CharSequence x] (whitespace-fn (.charAt x 0)))
            cf (fn ([] (StringBuilder. 5))
                 ([^StringBuilder l ^CharSequence r]
@@ -283,7 +283,7 @@
                    ;; (.concat (.toString l) (.toString r))
                    ))
            rf (fn [^StringBuilder l ^Character r] (.append l r))]
-       (->> text-seq
+       (->> text-coll
             (partition-by whitespace-fn cf rf)
             (r/map (fn [^CharSequence sb] (.toString sb)))
             (->>/when-not keep-whitespace?

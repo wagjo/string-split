@@ -81,13 +81,15 @@ More notes:
 * `Folder time: 213 ms (849 ms when keeping whitespace chunks)`
   * slow performance when keeping whitespace chunks may be because benchmarking hits current JVM memory limit?
 
-### mutable iterative reducer/folder on random accessible collections
+### mutable iterative reducer/folder with shifting folder
 
+* see [wagjo.split.algo.partitionby-shift](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/partitionby_shift.clj)
 * fastest flexible variant
-* avoids chunk/segment minigame when folding
+* avoids chunk/segment minigame when folding by providing custom folding function
 * works only on collections which support random access
-
-TODO
+  * not much faster but the implementation is significantly simpler
+* `Reducer time: same as previous`
+* `Folder time: 189 ms (811 ms when keeping whitespace chunks)`
 
 ## split on string
 

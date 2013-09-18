@@ -20,7 +20,8 @@
             [wagjo.split.algo.indexof :as siof]
             [wagjo.split.algo.lazy :as slazy]
             [wagjo.split.algo.partitionby :as spart]
-            [wagjo.split.algo.partitionby-naive :as snaive]))
+            [wagjo.split.algo.partitionby-naive :as snaive]
+            [wagjo.split.algo.partitionby-shift :as sshift]))
 
 ;;;; Implementation details
 
@@ -148,6 +149,21 @@
    (into [] (parallel (spart/split whitespace? text-vec))))
   (benchmarked
    (into [] (parallel (spart/split whitespace? true text-vec))))
+
+  ;; ==== mutable iterative reducer/folder with shift
+  ;; * fastest flexible variant
+
+  (timed (into [] (sshift/split whitespace? text-seq)))
+  (timed (into [] (sshift/split whitespace? true text-seq)))
+  (timed (into [] (parallel (sshift/split whitespace? text-vec))))
+  (timed (into []
+               (parallel (sshift/split whitespace? true text-vec))))
+  (benchmarked (into [] (sshift/split whitespace? text-seq)))
+  (benchmarked (into [] (sshift/split whitespace? true text-seq)))
+  (benchmarked
+   (into [] (parallel (sshift/split whitespace? text-vec))))
+  (benchmarked
+   (into [] (parallel (sshift/split whitespace? true text-vec))))
 
   ;; === split on string
   ;; * very fast because we have all data in memory

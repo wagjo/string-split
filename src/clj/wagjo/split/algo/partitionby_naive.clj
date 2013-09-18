@@ -211,11 +211,11 @@
    according to whitespace-fn. Returned collection does not contain
    empty strings. If keep-whitespace? is true (defaults to false),
    returned collection will contain 'whitespace chunks'."
-  ([whitespace-fn text-seq]
-     (split whitespace-fn false text-seq))
-  ([whitespace-fn keep-whitespace? text-seq]
+  ([whitespace-fn text-coll]
+     (split whitespace-fn false text-coll))
+  ([whitespace-fn keep-whitespace? text-coll]
      (let [f (fn [^String x] (whitespace-fn (.charAt x 0)))]
-       (->> text-seq
+       (->> text-coll
             (partition-by whitespace-fn str)
             (->>/when-not keep-whitespace?
               (r/remove f))))))
