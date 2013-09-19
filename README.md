@@ -119,7 +119,7 @@ More notes:
 
 ### optimized iterative reducer/folder
 
-* see [wagjo.split.algo.partitionby-string](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/partitionby-string.clj)
+* see [wagjo.split.algo.partitionby-string](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/partitionby_string.clj)
 * like flexible partition-by, but optimized for strings
 * `Reducer time: 225 ms (213 ms when keeping whitespace chunks)`
 * `Folder time: 54 ms (71 ms when keeping whitespace chunks)`
