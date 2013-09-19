@@ -187,11 +187,6 @@
   ;; NOTE: special variant returns CharSequences which shares
   ;;       underlying strings
 
-  (=
-   (into [] (parallel (sstring/split whitespace? false true text)))
-   (into [] (siof/split \space text))
-   (into [] (sstring/split whitespace? text)))
-
   (timed (into [] (sstring/split whitespace? text)))
   (timed (into [] (sstring/split whitespace? true text)))
   (timed (into [] (sstring/split whitespace? false true text)))
@@ -217,13 +212,9 @@
   
   ;;; indexOf reducer/folder
   
-  ;; NOTE: indexOf variant does not return whitespace chunks
+  ;; NOTE: special variant returns CharSequences which shares
+  ;;       underlying strings
 
-  (= (into [] (siof/split \space true true text))
-     (into [] (parallel (siof/split \space true true text)))
-     (into [] (parallel (sstring/split whitespace? true text))))
-  text
-  
   (timed (into [] (siof/split \space text)))
   (timed (into [] (siof/split \space true text)))
   (timed (into [] (siof/split \space false true text)))
@@ -232,13 +223,16 @@
   (timed (into [] (parallel (siof/split \space true text))))
   (timed (into [] (parallel (siof/split \space false true text))))
   (timed (into [] (parallel (siof/split \space true true text))))
+
   (benchmarked (into [] (siof/split \space text)))
+  (benchmarked (into [] (siof/split \space true text)))
+  (benchmarked (into [] (siof/split \space false true text)))
+  (benchmarked (into [] (siof/split \space true true text)))
   (benchmarked (into [] (parallel (siof/split \space text))))
-
-  ;;; indexOf reducer/folder with shared strings
-
-  ;; NOTE: indexOf splitter does not return whitespace chunks
-
-  ;; TODO
+  (benchmarked (into [] (parallel (siof/split \space true text))))
+  (benchmarked
+   (into [] (parallel (siof/split \space false true text))))
+  (benchmarked
+   (into [] (parallel (siof/split \space true true text))))
   
 )

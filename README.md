@@ -135,16 +135,12 @@ More notes:
   * delimiter is one character, or string (not implemented yet)
   * does not keep delimiters (whitespace chunks) in the result
 * lowest memory use and almost no garbage (a tiny bit when folding)
-* `Reducer time: 80 ms`
-* `Folder time: 30 ms`
-
-### indexOf reducer/folder with shared String
-
-* Java 7 no longes shares underlying string
-* this variant uses custom String-like class, which shares data with
-  original string
-
-* TODO
+* `Reducer time: 80 ms (136 ms when keeping whitespace chunks)`
+* `Folder time: 37 ms (71 ms when keeping whitespace chunks)`
+* special variant which produces String-like objects which implements
+  CharSequence and shares underlaying data with source string
+* `Reducer time: 52 ms (79 ms when keeping whitespace chunks)`
+* `Folder time: 27 ms (54 ms when keeping whitespace chunks)`
 
 ## Machine
 
