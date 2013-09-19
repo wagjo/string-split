@@ -219,8 +219,19 @@
   
   ;; NOTE: indexOf variant does not return whitespace chunks
 
+  (= (into [] (siof/split \space true true text))
+     (into [] (parallel (siof/split \space true true text)))
+     (into [] (parallel (sstring/split whitespace? true text))))
+  text
+  
   (timed (into [] (siof/split \space text)))
+  (timed (into [] (siof/split \space true text)))
+  (timed (into [] (siof/split \space false true text)))
+  (timed (into [] (siof/split \space true true text)))
   (timed (into [] (parallel (siof/split \space text))))
+  (timed (into [] (parallel (siof/split \space true text))))
+  (timed (into [] (parallel (siof/split \space false true text))))
+  (timed (into [] (parallel (siof/split \space true true text))))
   (benchmarked (into [] (siof/split \space text)))
   (benchmarked (into [] (parallel (siof/split \space text))))
 
