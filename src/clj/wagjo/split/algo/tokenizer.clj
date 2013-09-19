@@ -155,8 +155,8 @@
    contain empty strings. If keep-whitespace? is true (defaults to
    false), returned collection will contain 'whitespace chunks'."
   ([delimiters string]
-     (split delimiters string false))
-  ([delimiters string keep-whitespace?]
+     (split delimiters false string))
+  ([delimiters keep-whitespace? string]
      (if keep-whitespace?
        (KeepingTokenizerSplit. delimiters string)
        (TokenizerSplit. delimiters string))))

@@ -23,7 +23,8 @@
             [wagjo.split.algo.tokenizer :as stoken]
             [wagjo.split.algo.partitionby :as spart]
             [wagjo.split.algo.partitionby-naive :as snaive]
-            [wagjo.split.algo.partitionby-shift :as sshift]))
+            [wagjo.split.algo.partitionby-shift :as sshift]
+            [wagjo.split.algo.partitionby-string :as sstring]))
 
 ;;;; Implementation details
 
@@ -167,23 +168,52 @@
 
   (=
    #_(into [] (siof/split \space text))
-   (into [] (stoken/split " \t\r\n" text true))
-   (into [] (parallel (stoken/split " \t\r\n" text true))))
+   (into [] (stoken/split " \t\r\n" true text))
+   (into [] (parallel (stoken/split " \t\r\n" true text))))
   
   (timed (into [] (stoken/split " \t\r\n" text)))
-  (timed (into [] (stoken/split " \t\r\n" text true)))
+  (timed (into [] (stoken/split " \t\r\n" true text)))
   (timed (into [] (parallel (stoken/split " \t\r\n" text))))
-  (timed (into [] (parallel (stoken/split " \t\r\n" text true))))
+  (timed (into [] (parallel (stoken/split " \t\r\n" true text))))
   
   (benchmarked (into [] (stoken/split " \t\r\n" text)))
-  (benchmarked (into [] (stoken/split " \t\r\n" text true)))
+  (benchmarked (into [] (stoken/split " \t\r\n" true text)))
   (benchmarked (into [] (parallel (stoken/split " \t\r\n" text))))
   (benchmarked
-   (into [] (parallel (stoken/split " \t\r\n" text true))))
+   (into [] (parallel (stoken/split " \t\r\n" true text))))
 
   ;;; optimized iterative reducer/folder
 
-  ;; TODO
+  ;; NOTE: special variant returns CharSequences which shares
+  ;;       underlying strings
+
+  (=
+   (into [] (parallel (sstring/split whitespace? false true text)))
+   (into [] (siof/split \space text))
+   (into [] (sstring/split whitespace? text)))
+
+  (timed (into [] (sstring/split whitespace? text)))
+  (timed (into [] (sstring/split whitespace? true text)))
+  (timed (into [] (sstring/split whitespace? false true text)))
+  (timed (into [] (sstring/split whitespace? true true text)))
+  (timed (into [] (parallel (sstring/split whitespace? text))))
+  (timed (into [] (parallel (sstring/split whitespace? true text))))
+  (timed
+   (into [] (parallel (sstring/split whitespace? false true text))))
+  (timed
+   (into [] (parallel (sstring/split whitespace? true true text))))
+  
+  (benchmarked (into [] (sstring/split whitespace? text)))
+  (benchmarked (into [] (sstring/split whitespace? true text)))
+  (benchmarked (into [] (sstring/split whitespace? false true text)))
+  (benchmarked (into [] (sstring/split whitespace? true true text)))
+  (benchmarked (into [] (parallel (sstring/split whitespace? text))))
+  (benchmarked
+   (into [] (parallel (sstring/split whitespace? true text))))
+  (benchmarked
+   (into [] (parallel (sstring/split whitespace? false true text))))
+  (benchmarked
+   (into [] (parallel (sstring/split whitespace? true true text))))
   
   ;;; indexOf reducer/folder
   

@@ -106,22 +106,27 @@ More notes:
 * see [wagjo.split.algo.regex](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/regex.clj)
 * any regex, uses matcher so that we support early termination of reduce
 * fast, but keep in mind that you are using a cannon to shoot mosquitoes
-* `Reducer time: 296 ms (445 ms when keeping delimiters)`
-* `Folder time: 84 ms (123 ms when keeping delimiters)`
+* `Reducer time: 296 ms (445 ms when keeping whitespace chunks)`
+* `Folder time: 84 ms (123 ms when keeping whitespace chunks)`
 
 ### StringTokenizer reducer/folder
 
 * see [wagjo.split.algo.tokenizer](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/tokenizer.clj)
 * takes set of delimiting chars
 * fast, but StringTokenizer is deprecated in java
-* `Reducer time: 134 ms (293 ms when keeping delimiters)`
-* `Folder time: 71 ms (120 ms when keeping delimiters)`
+* `Reducer time: 134 ms (293 ms when keeping whitespace chunks)`
+* `Folder time: 71 ms (120 ms when keeping whitespace chunks)`
 
 ### optimized iterative reducer/folder
 
+* see [wagjo.split.algo.partitionby-string](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/partitionby-string.clj)
 * like flexible partition-by, but optimized for strings
-
-TODO
+* `Reducer time: 225 ms (213 ms when keeping whitespace chunks)`
+* `Folder time: 54 ms (71 ms when keeping whitespace chunks)`
+* special variant which produces String-like objects which implements
+  CharSequence and shares underlaying data with source string
+* `Reducer time: 161 ms (140 ms when keeping whitespace chunks)`
+* `Folder time: 42 ms (56 ms when keeping whitespace chunks)`
   
 ### indexOf reducer/folder
 
