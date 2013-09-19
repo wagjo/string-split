@@ -111,9 +111,11 @@ More notes:
 
 ### StringTokenizer reducer/folder
 
-* set of delimiting chars
-
-TODO
+* see [wagjo.split.algo.tokenizer](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/tokenizer.clj)
+* takes set of delimiting chars
+* fast, but StringTokenizer is deprecated in java
+* `Reducer time: xxx ms`
+* `Folder time: xxx ms`
 
 ### optimized iterative reducer/folder
 

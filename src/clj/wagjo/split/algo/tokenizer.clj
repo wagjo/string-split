@@ -10,10 +10,11 @@
 ;;
 ;; You must not remove this notice, or any other, from this software.
 
-(ns wagjo.split.algo.regex
-  "Regex string reducible and foldable splitter."
+(ns wagjo.split.algo.tokenizer
+  "Reducible and foldable string splitter based on StringTokenizer."
   (:require [clojure.core.reducers :as r]
-            [clojure.core.protocols :as p]))
+            [clojure.core.protocols :as p])
+  (:import [java.util StringTokenizer]))
 
 ;;;; Implementation details
 
@@ -26,23 +27,22 @@
 
 (defn fold-split
   "Returns an index where the split is safe, or returns nil."
-  [^String string start regex]
-  (let [^java.util.regex.Matcher m (re-matcher regex string)]
-    (when (.find m start)
-      (let [split (.end m)]
-        (when-not (== split (.length string))
-          split)))))
+  [^String string start delim]
+  (let [string (.substring string start)
+        m (StringTokenizer. string delim true)]
+    (when (.hasMoreTokens m)
+      (+ start (.length (.nextToken m))))))
 
-(deftype RegexMatch [^java.util.regex.Pattern regex ^String string]
+(deftype TokenizerSplit [^String delim ^String string ^boolean keep?]
   p/CollReduce
   (coll-reduce [this f1]
     (p/coll-reduce this f1 (f1)))
   (coll-reduce [_ f1 init]
-    (let [^java.util.regex.Matcher m (re-matcher regex string)]
+    (let [m (StringTokenizer. string delim keep?)]
       (loop [ret init]
-        (if-not (.find m)
+        (if-not (.hasMoreTokens m)
           ret
-          (let [ret (f1 ret (.group m))]
+          (let [ret (f1 ret (.nextToken m))]
             (if (reduced? ret)
               @ret
               (recur ret)))))))
@@ -54,9 +54,13 @@
        (.isEmpty string) (combinef)
        (<= l n) (rf)
        :else
-       (if-let [split (fold-split string (quot l 2) regex)]
-         (let [c1 (RegexMatch. regex (.substring string 0 split))
-               c2 (RegexMatch. regex (.substring string split))
+       (if-let [split (fold-split string (quot l 2) delim)]
+         (let [c1 (TokenizerSplit. delim
+                                   (.substring string 0 split)
+                                   keep?)
+               c2 (TokenizerSplit. delim
+                                   (.substring string split)
+                                   keep?)
                fc (fn [child] #(r/coll-fold child n combinef reducef))]
            (fjinvoke #(let [f1 (fc c1)
                             t2 (fjtask (fc c2))]
@@ -68,6 +72,10 @@
 
 (defn split
   "Returns reducible and foldable collection of splitted strings
-   according to given regex."
-  [regex string]
-  (RegexMatch. regex string))
+   delimited by one of given delimiters.
+   If keep-delimiters? is true, returned collection will contain
+   also individual delimiters."
+  ([delimiters string]
+     (split delimiters string false))
+  ([delimiters string keep-delimiters?]
+     (TokenizerSplit. delimiters string keep-delimiters?)))
