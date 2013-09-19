@@ -106,16 +106,16 @@ More notes:
 * see [wagjo.split.algo.regex](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/regex.clj)
 * any regex, uses matcher so that we support early termination of reduce
 * fast, but keep in mind that you are using a cannon to shoot mosquitoes
-* `Reducer time: 296 ms`
-* `Folder time: 84 ms`
+* `Reducer time: 296 ms (445 ms when keeping delimiters)`
+* `Folder time: 84 ms (123 ms when keeping delimiters)`
 
 ### StringTokenizer reducer/folder
 
 * see [wagjo.split.algo.tokenizer](https://github.com/wagjo/string-split/blob/master/src/clj/wagjo/split/algo/tokenizer.clj)
 * takes set of delimiting chars
 * fast, but StringTokenizer is deprecated in java
-* `Reducer time: xxx ms`
-* `Folder time: xxx ms`
+* `Reducer time: 134 ms (293 ms when keeping delimiters)`
+* `Folder time: 71 ms (120 ms when keeping delimiters)`
 
 ### optimized iterative reducer/folder
 
@@ -138,6 +138,7 @@ TODO
 * Java 7 no longes shares underlying string
 * this variant uses custom String-like class, which shares data with
   original string
+
 * TODO
 
 ## Machine

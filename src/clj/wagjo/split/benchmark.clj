@@ -90,36 +90,19 @@
   (time (def text (corpus 1000)))
   (time (def text (corpus 1000000)))
 
-  ;; == Various ways to split a string
-  ;; * everything implemented as both reducible
-  ;;   and foldable collection
-  ;; ** except variants using lazy seqs
-  ;; ** reducer variants support early termination e.g. with r/take
-  ;; * most variants have limits on what is a delimiter, or
-  ;;   how the result will look like
-  ;; ** in return they deliver better performance
-  ;; * two categories
-  ;; ** partition-by on a collection of characters
-  ;; ** splitting a string
+  
+  ;;;; PARTITION-BY ON COLLECTION OF CHARACTERS
 
-  ;; === partition-by on collection of characters
-  ;; * supports infinite collections
-  ;; * does not need whole string in memory at once
-  ;; * supports any predicate fn
-  ;; * small memory usage
-
-  ;; ==== lazy-seqs
-  ;; * very slow, should not be used, ever
-  ;; * no parallel variant
-  ;; * can keep whitespace chunks in the result
+  
+  ;;; lazy-seqs
 
   (timed (into [] (slazy/split whitespace? text-seq)))
   (timed (into [] (slazy/split whitespace? true text-seq)))
+
   (benchmarked (into [] (slazy/split whitespace? text-seq)))
   (benchmarked (into [] (slazy/split whitespace? true text-seq)))
 
-  ;; ==== naive iterative reducer/folder
-  ;; * slow but straightforward
+  ;;; naive iterative reducer/folder
 
   (timed (into [] (snaive/split whitespace? text-seq)))
   (timed (into [] (snaive/split whitespace? true text-seq)))
@@ -129,22 +112,19 @@
 
   (benchmarked (into [] (snaive/split whitespace? text-seq)))
   (benchmarked (into [] (snaive/split whitespace? true text-seq)))
-
-  (benchmarked (into [] (snaive/split whitespace? text-vec)))
-  (benchmarked (into [] (snaive/split whitespace? true text-vec)))
   (benchmarked
    (into [] (parallel (snaive/split whitespace? text-vec))))
   (benchmarked
    (into [] (parallel (snaive/split whitespace? true text-vec))))
 
-  ;; ==== mutable iterative reducer/folder
-  ;; * fastest flexible variant
+  ;;; mutable iterative reducer/folder
 
   (timed (into [] (spart/split whitespace? text-seq)))
   (timed (into [] (spart/split whitespace? true text-seq)))
   (timed (into [] (parallel (spart/split whitespace? text-vec))))
   (timed (into []
                (parallel (spart/split whitespace? true text-vec))))
+
   (benchmarked (into [] (spart/split whitespace? text-seq)))
   (benchmarked (into [] (spart/split whitespace? true text-seq)))
   (benchmarked
@@ -152,14 +132,14 @@
   (benchmarked
    (into [] (parallel (spart/split whitespace? true text-vec))))
 
-  ;; ==== mutable iterative reducer/folder with shift
-  ;; * fastest flexible variant
+  ;;; mutable iterative reducer/folder with shift
 
   (timed (into [] (sshift/split whitespace? text-seq)))
   (timed (into [] (sshift/split whitespace? true text-seq)))
   (timed (into [] (parallel (sshift/split whitespace? text-vec))))
   (timed (into []
                (parallel (sshift/split whitespace? true text-vec))))
+
   (benchmarked (into [] (sshift/split whitespace? text-seq)))
   (benchmarked (into [] (sshift/split whitespace? true text-seq)))
   (benchmarked
@@ -167,45 +147,57 @@
   (benchmarked
    (into [] (parallel (sshift/split whitespace? true text-vec))))
 
-  ;; === split on string
-  ;; * very fast because we have all data in memory
-  ;; * larger memory usage
-  ;; * often strips delimiters from the result
-  ;; ** some variants return empty strings for subsequent delimiters
-  ;; ** depends on use case whether this is good or not
-  ;; * less flexible, each approach has its own limits on delimiters
-  ;;   or at the returned result
+  
+  ;;;; SPLIT ON STRING
 
-  ;; ==== regex reducer/folder
-  ;; * any regex, may return empty strings
+  
+  ;;; regex reducer/folder
+
+  (timed (into [] (sregex/split #"\S+" text)))
+  (timed (into [] (sregex/split #"\S+|\s+" text)))
+  (timed (into [] (parallel (sregex/split #"\S+" text))))
+  (timed (into [] (parallel (sregex/split #"\S+|\s+" text))))
+
+  (benchmarked (into [] (sregex/split #"\S+" text)))
+  (benchmarked (into [] (sregex/split #"\S+|\s+" text)))
+  (benchmarked (into [] (parallel (sregex/split #"\S+" text))))
+  (benchmarked (into [] (parallel (sregex/split #"\S+|\s+" text))))
+
+  ;;; StringTokenizer reducer/folder
 
   (=
-    (into [] (siof/split \space text))
-    (into [] (stoken/split " \t\r\n" text))
-    (into [] (parallel (stoken/split " \t\r\n" text))))
+   #_(into [] (siof/split \space text))
+   (into [] (stoken/split " \t\r\n" text true))
+   (into [] (parallel (stoken/split " \t\r\n" text true))))
   
   (timed (into [] (stoken/split " \t\r\n" text)))
+  (timed (into [] (stoken/split " \t\r\n" text true)))
   (timed (into [] (parallel (stoken/split " \t\r\n" text))))
+  (timed (into [] (parallel (stoken/split " \t\r\n" text true))))
   
   (benchmarked (into [] (stoken/split " \t\r\n" text)))
+  (benchmarked (into [] (stoken/split " \t\r\n" text true)))
   (benchmarked (into [] (parallel (stoken/split " \t\r\n" text))))
+  (benchmarked
+   (into [] (parallel (stoken/split " \t\r\n" text true))))
 
-  ;; ==== StringTokenizer reducer/folder
-  ;; * set of delimiting chars
-  ;; TODO
+  ;;; optimized iterative reducer/folder
 
-  ;; ==== optimized iterative reducer/folder
-  ;; * like flexible partition-by, but optimized for strings
   ;; TODO
   
-  ;; ==== indexOf reducer/folder
-  ;; * THE fastest reducer/folder, but has specific limitations
-  ;; ** delimiter is one character, or string (not implemented yet)
-  ;; ** does not keep delimiters (whitespace chunks) in the result
+  ;;; indexOf reducer/folder
   
+  ;; NOTE: indexOf variant does not return whitespace chunks
+
   (timed (into [] (siof/split \space text)))
   (timed (into [] (parallel (siof/split \space text))))
   (benchmarked (into [] (siof/split \space text)))
   (benchmarked (into [] (parallel (siof/split \space text))))
+
+  ;;; indexOf reducer/folder with shared strings
+
+  ;; NOTE: indexOf splitter does not return whitespace chunks
+
+  ;; TODO
   
 )
