@@ -14,13 +14,12 @@
   "Helper functions for ->> threading."
   (:refer-clojure :exclude [when when-not]))
 
-;;;; Implementation details
-
 ;;;; Public API
 
 (defmacro when-not
-  "If pred is false, threads x through body, otherwise returns
-   x unchanged. Inspired by lonocloud/synthread."
+  "If pred is false, threads last element of body (x) through rest of
+   the body, using ->>. Otherwise returns x unchanged.
+   Inspired by lonocloud/synthread."
   [pred & body]
   (let [x (last body)
         body (butlast body)]

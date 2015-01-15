@@ -19,21 +19,28 @@
 ;;;; Implementation details
 
 (def ^:private ascii-alphanumeric
-  (vec (map char (concat (range 48 58)       ;; numbers
-                         (range 65 91)       ;; uppercase
-                         (range 97 123)))))  ;; lowercase
+  (->> (concat (range 48 58)   ;; numbers
+               (range 65 91)   ;; uppercase
+               (range 97 123)) ;; lowercase
+       (map char)
+       vec))
 
 (defn ^:private default-word-sizer
+  "Returns default word sizer."
   []
   (gen/uniform 1 17))
 
 (defn ^:private word
+  "Returns one word as a string. The size
+   of the word is controlled by sizer."
   ([]
      (word default-word-sizer))
   ([sizer]
      (gen/string #(gen/rand-nth ascii-alphanumeric) sizer)))
 
 (defn ^:private space
+  "Returns word delimiter as a string constisting of spaces.
+   The size of returned string is controlled by sizer."
   ([]
      (space (gen/uniform 1 3)))
   ([sizer]
@@ -44,7 +51,8 @@
 (defn corpus
   "Generates a random string with a given number of words
   sepparated by variable whitespace. Appends trailing whitespace."
-  ([word-count] (corpus word-count default-word-sizer))
+  ([word-count]
+     (corpus word-count default-word-sizer))
   ([word-count word-sizer]
      (let [text (StringBuilder.)]
        (dotimes [_ word-count]

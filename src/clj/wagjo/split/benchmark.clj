@@ -16,6 +16,7 @@
   (:require [clojure.core.reducers :as r]
             [clojure.string :as str]
             [criterium.core :refer :all]
+            [incanter core stats charts datasets]
             [wagjo.util.generator :refer [corpus]]
             [wagjo.split.algo.indexof :as siof]
             [wagjo.split.algo.lazy :as slazy]
@@ -43,31 +44,41 @@
       (max 4096)))
 
 (defonce ^{:private true
-           :doc "text which is being splitted"}
+           :doc "Text which is being splitted, as a string"}
   text
   "")
 
 (def ^{:private true
-       :doc "text seq which is being splitted"}
+       :doc "Text seq, used in partition-by variants"}
   text-seq
   (doall (seq text)))
 
 (def ^{:private true
-       :doc "text seq which is being splitted"}
+       :doc "Text vec, used when folding"}
   text-vec
   (vec text-seq))
 
 (defmacro ^:private parallel
   "Helper macro to run the folding."
-  ([expr]
-     `(parallel ~expr (guess-chunk-size text)))
-  ([expr chunk-size]
-     `(r/fold ~chunk-size r/cat r/append! ~expr)))
+  ([fld]
+     `(parallel ~fld (guess-chunk-size text))) ;; sorry
+  ([fld chunk-size]
+     `(r/fold ~chunk-size r/cat r/append! ~fld)))
 
 (defmacro ^:private timed
   "Helper macro to run the simple time with count."
+  [red]
+  `(time (count ~red)))
+
+(defmacro ^:private timed-into
+  "Helper macro to run the simple time with count."
+  [& bodyu]
+  `(timed (into [] ~@expr)))
+
+(defmacro ^:private benchmarked
+  "Helper macro to run the benchmarking."
   [& expr]
-  `(time (count ~@expr)))
+  `(with-progress-reporting (bench (do ~@expr) :verbose)))
 
 (defmacro ^:private benchmarked
   "Helper macro to run the benchmarking."
@@ -234,5 +245,53 @@
    (into [] (parallel (siof/split \space false true text))))
   (benchmarked
    (into [] (parallel (siof/split \space true true text))))
+
+  ;; chart without whitespace chunks
+
+  (do
+    (def ch-label ["lazy" "naive" "naive" "mutable" "mutable" "mutable"])
+    
+    (def ch-data [3200 1550 2500 575 213 189])
+    
+    (def ch-groups ["Reduce" "Reduce" "Fold" "Reduce" "Fold" "Shifting fold"])
+
+    (def s-label ["regex" "regex" "tokenizer" "tokenizer" "string partition-by" "string partition-by" "string partition-by shared" "string partition-by shared" "indexOf" "indexOf" "indexOf shared" "indexOf shared"])
+    
+    (def s-data [296 84 134 71 225 54 161 42 80 37 52 27])
+    
+    (def s-groups ["Reduce" "Fold" "Reduce" "Fold" "Reduce" "Fold" "Reduce" "Fold" "Reduce" "Fold" "Reduce" "Fold" ])
+
+    (def ch (incanter.charts/bar-chart
+             ch-label ch-data
+              :group-by ch-groups
+              :title "partition-by on a sequence of characters (lower is better)"
+              :x-label "variants"
+              :y-label "time (ms)"
+              :legend true
+              :vertical false
+              ))
+
+    (def s (incanter.charts/bar-chart
+              s-label s-data
+              :group-by s-groups
+              :title "String split (lower is better)"
+              :x-label "variants"
+              :y-label "time (ms)"
+              :legend true
+              :vertical false
+              ))
+
+    #_(def chl (incanter.charts/set-axis
+              ch :y (incanter.charts/log-axis)))
+    
+    (incanter.core/view ch)
+    (incanter.core/view s))
+
+
+  (def plot (incanter.charts/bar-chart ["a" "b" "c"] [10 20 30] :legend true :series-label "s1"))
+  
+  (incanter.core/view plot)
+  
+  (incanter.charts/add-categories plot ["a" "b" "c"] [5 25 40] :series-label "s2") 
   
 )
